@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-xRzPfobI3oZACNtBg7qlzRASM2ey42Vawi1ZRh27+1M='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+  <meta name="description" content="DOMINO SKY – friendly airline operations control room (sample data).">
+  <title>DOMINO SKY – Your Sky Control Room</title>
+  <style>
+:root{--bg:#070d1f;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.16);--txt:#f2f6ff;--mut:#c3d0e8;--acc:#8fb0ff;--pink:#ff8fe0;--ok:#5ee6b5;--warn:#ffc857;--bad:#ff7a88}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Segoe UI",system-ui,sans-serif;color:var(--txt);min-height:100vh;padding:0 18px 40px;background:radial-gradient(1000px 500px at 0% -10%,#2b3a8a66,transparent),radial-gradient(800px 500px at 100% 0%,#7a2a7a44,transparent),var(--bg)}
+h1{margin:0;font-size:clamp(22px,4vw,30px);background:linear-gradient(90deg,#fff,var(--acc),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:4px 0 10px;font-size:17px}
+p{margin:4px 0}
+.muted{color:var(--mut);font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px}.skip:focus{left:18px;top:8px;z-index:30;background:var(--card);padding:6px 10px;border-radius:8px}
+header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:20px 4px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);margin-bottom:14px}
+button,select,input{font:inherit;color:var(--txt);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+.act,.big{background:linear-gradient(135deg,var(--acc),var(--pink));border:0;color:#0a1020;font-weight:700}
+.big{padding:14px 22px;font-size:16px;border-radius:16px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 16px}
+.tabs button{white-space:nowrap;border-radius:99px;background:transparent}
+.tabs button[aria-selected=true]{background:var(--card);border-color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat{text-align:center;margin:0}.stat span{font-size:26px}.stat b{display:block;font-size:26px}.stat small{color:var(--mut)}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.row{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 4px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
+.row .time{font-size:18px}.row .sub{display:block;color:var(--mut);font-size:13px}
+.bar{height:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--pink));border-radius:99px;transition:width .6s}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toolbar input{min-width:260px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{--c:var(--line);border-radius:99px;padding:5px 12px;font-size:13px;border-color:var(--c);color:var(--txt)}
+.chip.on{background:rgba(143,176,255,.3);border-color:var(--acc)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left;color:var(--txt);cursor:pointer}
+.card header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rt{font-size:18px;font-weight:600}.rt span{margin:0 8px;color:var(--acc)}
+.pill{--c:var(--mut);display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;background:color-mix(in srgb,var(--c) 25%,transparent);color:var(--c);white-space:nowrap}
+.scn{text-align:center;align-items:center}.scn .emo{font-size:40px}
+.hero{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+.toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9;max-width:92vw}
+.toast{background:#17264af2;border:1px solid var(--acc);padding:10px 16px;border-radius:14px}
+.modal{position:fixed;inset:0;background:rgba(3,6,18,.7);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.sheet{width:min(620px,100%);max-height:88vh;overflow:auto;position:relative;background:#0f1d3cf2;margin:0}
+.x{position:absolute;top:10px;right:10px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 16px;margin-top:10px}
+.kv div{background:rgba(255,255,255,.05);border-radius:12px;padding:8px 10px;overflow-wrap:anywhere}
+.kv span{display:block;color:var(--mut);font-size:12px}
+.histo{display:flex;align-items:flex-end;gap:3px;height:90px;margin:14px 0 4px}
+.histo i{flex:1;border-radius:4px 4px 0 0}
+.ok-t{color:var(--ok)}.bad-t{color:var(--bad)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+  <a class="skip" href="#view">Skip to content</a>
+  <header class="top">
+    <div><h1 id="greet">Good morning</h1><p class="muted" id="sub"></p></div>
+    <div id="ring"></div>
+    <div class="ctrl">
+      <label for="clock">🌅 Time of day</label>
+      <input type="range" id="clock" min="300" max="1440" step="15" aria-valuetext="Simulated time">
+      <b id="clk" aria-live="off"></b> 🌙
+      <button id="undo" type="button">↶ Undo</button>
+      <button id="reset" type="button">↻ Start over</button>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <main id="view" tabindex="-1"></main>
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <script>
+// Operating rules and sample data. Replace generateSchedule() with your real dataset loader.
+const TURN = 30;        // minimum turnaround, minutes
+const MAXDUTY = 600;    // maximum crew duty, minutes
+const CAP = 180;        // seats per aircraft
+const AP_CAP = 6;       // baseline movements per hour per airport
+
+const AP_ALL = {
+  DEL: 'Delhi', BOM: 'Mumbai', BLR: 'Bengaluru', MAA: 'Chennai', CCU: 'Kolkata', HYD: 'Hyderabad',
+  AMD: 'Ahmedabad', COK: 'Kochi', PNQ: 'Pune', GOI: 'Goa', JAI: 'Jaipur', LKO: 'Lucknow',
+  PAT: 'Patna', IXC: 'Chandigarh', GAU: 'Guwahati', TRV: 'Thiruvananthapuram'
+};
+const CODES = Object.keys(AP_ALL);
+
+const pad = n => String(n).padStart(2, '0');
+const hm = m => pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60);
+
+// Sample schedule: 16 aircraft + 2 spares, 70 flights, 16 crew, 21 connections.
+// Seeded so every load produces the same schedule.
+function generateSchedule(seed = 42) {
+  let x = seed;
+  const rnd = () => (x = (x * 16807) % 2147483647) / 2147483647;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const fleet = [], flights = [], conns = [];
+
+  for (let i = 1; i <= 16; i++) fleet.push({ reg: 'VT-DS' + pad(i), loc: pick(CODES), spare: false, down: null });
+  fleet.push({ reg: 'VT-DS17', loc: 'BLR', spare: true, avail: 300, down: null },
+             { reg: 'VT-DS18', loc: 'DEL', spare: true, avail: 300, down: null });
+
+  fleet.slice(0, 16).forEach((a, k) => {
+    const n = k < 6 ? 5 : 4;
+    let t = 300 + Math.floor(rnd() * 120), loc = a.loc;
+    for (let j = 0; j < n; j++) {
+      let d; do { d = pick(CODES); } while (d === loc);
+      const dur = 50 + Math.floor(rnd() * 70);
+      flights.push({ num: 'DS' + (101 + flights.length), reg: a.reg, from: loc, to: d, dep: t, arr: t + dur,
+        delay: 0, dlay: 0, pax: 120 + Math.floor(rnd() * 60), cancelled: false, covered: false, adep: t, aarr: t + dur });
+      t += dur + 45 + Math.floor(rnd() * 31);
+      loc = d;
+    }
+  });
+
+  let guard = 0;
+  while (conns.length < 21 && guard++ < 9000) {
+    const f = pick(flights);
+    const cands = flights.filter(g => g.from === f.to && g !== f && g.dep - f.arr >= 30 && g.dep - f.arr <= 180);
+    if (!cands.length) continue;
+    const b = pick(cands);
+    if (conns.some(q => q.a === f && q.b === b)) continue;
+    conns.push({ id: 'CX' + pad(conns.length + 1), a: f, b, ap: f.to, pax: 40 + Math.floor(rnd() * 100), min: 45 });
+  }
+
+  const crewList = fleet.slice(0, 16).map((a, i) => ({ id: 'CR' + pad(i + 1), reg: a.reg, base: a.loc }));
+  const airports = Object.fromEntries(CODES.map(c => [c, { closed: false, factor: 1 }]));
+  return { fleet, flights, conns, crewList, airports };
+}
+
+// Pure scheduling logic. No DOM access, so it can be tested directly.
+
+function createSim(now = 600) {
+  const s = { now, acts: [], ...generateSchedule() };
+  recalc(s);
+  return s;
+}
+
+// Recompute actual times: an aircraft cannot leave before its previous flight has landed plus turnaround.
+function recalc(s) {
+  s.flights.forEach(f => {
+    const closed = s.airports[f.from].closed || s.airports[f.to].closed;
+    const grounded = !!s.fleet.find(a => a.reg === f.reg).down;
+    f.cancelled = !f.covered && f.dep >= s.now && (grounded || closed);
+  });
+  const by = {};
+  s.flights.forEach(f => { if (!f.cancelled) (by[f.reg] = by[f.reg] || []).push(f); });
+  Object.values(by).forEach(list => {
+    list.sort((x, y) => x.dep - y.dep);
+    let prev = null;
+    list.forEach(f => {
+      let d = f.dep + f.delay;
+      if (prev !== null) d = Math.max(d, prev + TURN);
+      f.adep = d; f.aarr = d + f.arr - f.dep; f.dlay = d - f.dep; prev = f.aarr;
+    });
+  });
+  s.flights.forEach(f => { if (f.cancelled) { f.adep = f.dep; f.aarr = f.arr; f.dlay = 0; } });
+  return s;
+}
+
+function fstat(s, f) {
+  if (f.cancelled) return 'Cancelled';
+  if (f.aarr <= s.now) return 'Landed';
+  if (f.adep <= s.now) return 'In Air';
+  if (f.adep - s.now <= 30) return 'Boarding';
+  if (f.dlay >= 15) return 'Delayed';
+  return 'Scheduled';
+}
+
+function crewInfo(s, reg) {
+  const l = s.flights.filter(f => f.reg === reg && !f.cancelled);
+  if (!l.length) return null;
+  const start = Math.min(...l.map(f => f.adep)) - 60; // 60 min pre-flight briefing
+  const end = Math.max(...l.map(f => f.aarr));
+  return { start, end, duty: end - start };
+}
+
+function connStat(c) {
+  if (c.a.cancelled || c.b.cancelled) return { gap: null, s: 'Missed' };
+  const gap = c.b.adep - c.a.aarr;
+  return { gap, s: gap < c.min ? 'Missed' : gap < c.min + 30 ? 'Tight' : 'Safe' };
+}
+
+function airLoad(s, c) {
+  const h = Array(24).fill(0);
+  s.flights.forEach(f => {
+    if (f.cancelled) return;
+    if (f.from === c) h[Math.floor(f.adep / 60) % 24]++;
+    if (f.to === c) h[Math.floor(f.aarr / 60) % 24]++;
+  });
+  return h;
+}
+
+const capOf = (s, c) => AP_CAP * s.airports[c].factor;
+
+function util(s, c) {
+  if (s.airports[c].closed) return 1;
+  return Math.max(...airLoad(s, c)) / Math.max(1, capOf(s, c));
+}
+
+function metrics(s) {
+  const cs = s.conns.map(connStat);
+  const viol = s.crewList.filter(c => { const i = crewInfo(s, c.reg); return i && i.duty > MAXDUTY; }).length;
+  return {
+    delayed: s.flights.filter(f => !f.cancelled && f.dlay >= 15).length,
+    cancelled: s.flights.filter(f => f.cancelled).length,
+    missed: cs.filter(c => c.s === 'Missed').length,
+    atRisk: cs.filter(c => c.s !== 'Safe').length,
+    viol, crewOk: s.crewList.length - viol,
+    nearCap: CODES.filter(c => util(s, c) >= 0.8).length
+  };
+}
+
+const problems = m => m.delayed + m.cancelled + m.missed + m.viol;
+
+// A spare can take a flight only if it is already at the origin, free in time, and available from 05:00.
+function spareOK(s, a, f) {
+  const l = s.flights.filter(g => g.reg === a.reg && !g.cancelled);
+  if (!l.length) return a.loc === f.from && f.dep >= a.avail;
+  const last = l.reduce((p, g) => (g.arr > p.arr ? g : p));
+  return last.to === f.from && last.arr + TURN <= f.dep && f.dep >= a.avail;
+}
+
+function applyRaw(s, t, g, v) {
+  if (t === 'Flight delay') s.flights.find(f => f.num === g).delay += v;
+  else if (t === 'Technical failure' || t === 'Crew sick') s.fleet.find(a => a.reg === g).down = t;
+  else if (t === 'Airport closed') s.airports[g].closed = true;
+  else if (t === 'Capacity cut') s.airports[g].factor = Math.max(0, 1 - v / 100);
+  else throw new Error('Unknown disruption: ' + t);
+}
+
+function summarise(b, a) {
+  const out = [];
+  const dc = a.cancelled - b.cancelled, dl = a.delayed - b.delayed, dm = a.missed - b.missed, dv = a.viol - b.viol;
+  if (dc > 0) out.push(`❌ ${dc} more flight${dc > 1 ? 's' : ''} cancelled.`);
+  if (dl > 0) out.push(`⏱ ${dl} more flight${dl > 1 ? 's' : ''} running late.`);
+  if (dm > 0) out.push(`🔗 ${dm} connection${dm > 1 ? 's' : ''} now missed.`);
+  if (dv > 0) out.push(`🧑‍✈️ ${dv} crew member${dv > 1 ? 's' : ''} over their hours.`);
+  if (a.nearCap > b.nearCap) out.push(`🛬 ${a.nearCap - b.nearCap} airport${a.nearCap - b.nearCap > 1 ? 's' : ''} near capacity.`);
+  return out.length ? out : ['✅ The network absorbed it with no new problems.'];
+}
+
+function applyDisruption(s, t, g, v) {
+  const before = metrics(s);
+  s.acts.push([t, g, v]);
+  applyRaw(s, t, g, v);
+  recalc(s);
+  return summarise(before, metrics(s));
+}
+
+// Rebuild the base schedule and replay every action except the last one.
+function undoLast(s) {
+  s.acts.pop();
+  const acts = s.acts;
+  Object.assign(s, generateSchedule(), { acts });
+  acts.forEach(a => applyRaw(s, ...a));
+  recalc(s);
+  return s;
+}
+
+function runRecovery(s) {
+  const before = problems(metrics(s)), log = [];
+  s.flights.filter(f => !f.covered && (f.cancelled || f.dlay >= 30))
+    .sort((x, y) => x.dep - y.dep)
+    .forEach(f => {
+      const sp = s.fleet.find(a => a.spare && !a.down && spareOK(s, a, f));
+      if (sp) {
+        f.reg = sp.reg; f.covered = true; f.delay = 0;
+        log.push(`✅ ${f.num} (${f.from}→${f.to}) now flies with ${sp.reg}, a spare already waiting at ${f.from}.`);
+      } else {
+        log.push(`⚠️ ${f.num}: no spare is free at ${f.from}, so it stays ${f.cancelled ? 'cancelled' : 'late'}.`);
+      }
+    });
+  recalc(s);
+  return { before, after: problems(metrics(s)), log };
+}
+
+// Rule checks run against the live schedule. A failing check is a real breach.
+function checks(s) {
+  const rows = [];
+  const add = (name, bad) => rows.push({
+    name, ok: bad.length === 0,
+    detail: bad.length ? `${bad.length} issue(s): ${bad.slice(0, 4).join(', ')}` : 'No issues found'
+  });
+  const by = {};
+  s.flights.filter(f => !f.cancelled).forEach(f => (by[f.reg] = by[f.reg] || []).push(f));
+  const turn = [], overlap = [], route = [];
+  Object.values(by).forEach(list => {
+    list.sort((x, y) => x.adep - y.adep);
+    for (let i = 1; i < list.length; i++) {
+      const p = list[i - 1], c = list[i];
+      if (c.adep < p.aarr + TURN) turn.push(c.num);
+      if (c.adep < p.aarr) overlap.push(c.num);
+      if (c.from !== p.to) route.push(c.num);
+    }
+  });
+  add('Turnaround of at least 30 min', turn);
+  add('No overlapping flights per aircraft', overlap);
+  add('Aircraft follow their route sequence', route);
+  add('Passengers within 180 seats', s.flights.filter(f => f.pax > CAP).map(f => f.num));
+  add('Crew duty within 600 min', s.crewList.filter(c => { const i = crewInfo(s, c.reg); return i && i.duty > MAXDUTY; }).map(c => c.id));
+  add('Spare aircraft start from 05:00', s.flights.filter(f => f.covered && f.dep < 300).map(f => f.num));
+  add('Connections have positive gaps', s.conns.filter(c => { const g = connStat(c).gap; return g !== null && g < 0; }).map(c => c.id));
+  return rows;
+}
+
+// UI layer. All rendering goes through esc(); events use delegation (no inline handlers).
+
+
+const S = createSim(600);
+const UI = { tab: 'board', detail: null, q: '', chip: 'all', diff: null, opt: null };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const st = f => fstat(S, f);
+
+const LBL = { Scheduled: '🕒 Upcoming', Boarding: '🚪 Boarding', 'In Air': '🛫 In the air', Landed: '🛬 Landed', Delayed: '⏱ Late', Cancelled: '❌ Cancelled' };
+const COL = { Scheduled: '#c3d0e8', Boarding: '#8fb0ff', 'In Air': '#8fb0ff', Landed: '#5ee6b5', Delayed: '#ffc857', Cancelled: '#ff7a88' };
+const LINK = { Safe: ['🟢 Safe', '#5ee6b5'], Tight: ['🟡 Tight', '#ffc857'], Missed: ['🔴 Missed', '#ff7a88'] };
+const CHIPS = [['all', 'All'], ['Scheduled', '🕒 Upcoming'], ['In Air', '🛫 In the air'], ['Landed', '🛬 Landed'], ['Late', '⏱ Late'], ['Cancelled', '❌ Cancelled']];
+const SCN = [
+  ['⛈️', 'Storm over Delhi', 'Heavy rain closes Delhi airport.', 'Airport closed', 'DEL', 0],
+  ['🔧', 'Plane needs a check-up', 'A technical fault grounds VT-DS05.', 'Technical failure', 'VT-DS05', 0],
+  ['⏱', 'Flight running late', 'DS101 is held for 45 minutes.', 'Flight delay', 'DS101', 45],
+  ['🌫️', 'Fog at Bengaluru', 'Runways slow down by half.', 'Capacity cut', 'BLR', 50],
+  ['🧑‍✈️', 'Pilot off sick', 'VT-DS09 has no captain today.', 'Crew sick', 'VT-DS09', 0],
+  ['🌬️', 'Strong winds in Mumbai', 'Busy airport loses 30% capacity.', 'Capacity cut', 'BOM', 30]
+];
+const TABS = [
+  ['board', '🛫 Live board', vBoard], ['flights', '✈️ Flights', vFlights], ['fleet', '🛠️ Fleet & Crew', vFleet],
+  ['links', '🔗 Connections', vLinks], ['whatif', '🌪️ What if?', vWhat], ['fix', '✨ Auto-fix', vFix], ['checks', '🧪 Checks', vChecks]
+];
+
+const pill = s => `<span class="pill" style="--c:${COL[s] || '#c3d0e8'}">${LBL[s] || esc(s)}</span>`;
+const stat = (e, n, l) => `<div class="glass stat"><span aria-hidden="true">${e}</span><b>${n}</b><small>${l}</small></div>`;
+const bar = p => `<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(p)}"><i style="width:${Math.min(100, Math.max(0, p))}%"></i></div>`;
+const kv = (k, v) => `<div><span>${k}</span>${v}</div>`;
+
+function toast(msg) {
+  const d = document.createElement('div');
+  d.className = 'toast'; d.textContent = msg;
+  $('toasts').appendChild(d);
+  setTimeout(() => d.remove(), 3800);
+}
+
+/* ---------- VIEWS ---------- */
+function vBoard(m) {
+  const dep = S.flights.filter(f => !f.cancelled && f.adep >= S.now - 30).sort((x, y) => x.adep - y.adep).slice(0, 12);
+  const arr = S.flights.filter(f => !f.cancelled && f.aarr >= S.now).sort((x, y) => x.aarr - y.aarr).slice(0, 8);
+  const top = CODES.map(c => ({ c, u: util(S, c) })).sort((a, b) => b.u - a.u).slice(0, 5);
+  const row = (t, f, note) => `<button class="row" data-act="flight" data-id="${esc(f.num)}">
+    <b class="time">${hm(t)}</b><span><b>${esc(f.num)}</b> <span class="muted">${esc(f.reg)}</span><span class="sub">${esc(f.from)} → ${esc(f.to)} · ${esc(note)}</span></span>${pill(st(f))}</button>`;
+  const list = (title, items) => `<section class="glass"><h2>${title}</h2>${items.join('') || '<p class="muted">Nothing scheduled right now</p>'}</section>`;
+  return `<div class="stats">${stat('🛫', S.flights.filter(f => st(f) === 'In Air').length, 'in the air')}${stat('⏱', m.delayed, 'running late')}${stat('❌', m.cancelled, 'cancelled')}${stat('🧑‍✈️', `${m.crewOk} / ${S.crewList.length}`, 'crews within hours')}</div>
+  <section class="glass"><h2>Busiest airports right now</h2><div class="chips">${top.map(({ c, u }) => `<button class="chip" data-act="air" data-id="${c}" style="--c:${u >= 1 ? '#ff7a88' : u >= .8 ? '#ffc857' : '#5ee6b5'}">${c} · ${Math.round(u * 100)}%</button>`).join('')}</div></section>
+  <div class="cols">${list('🛫 Next departures', dep.map(f => row(f.adep, f, `to ${AP_ALL[f.to]}${f.dlay >= 15 ? ' · ' + f.dlay + ' min late' : ''}`)))}${list('🛬 Next arrivals', arr.map(f => row(f.aarr, f, `from ${AP_ALL[f.from]}`)))}</div>`;
+}
+
+function flightCard(f, s) {
+  const pr = f.cancelled ? 0 : S.now >= f.aarr ? 100 : S.now <= f.adep ? 0 : (S.now - f.adep) / (f.aarr - f.adep) * 100;
+  const note = f.cancelled ? 'Passengers are being rebooked' : f.dlay >= 15 ? `Running ${f.dlay} min late` : f.dlay > 0 ? `Slightly late (${f.dlay} min)` : 'On time 👍';
+  return `<button class="card" data-act="flight" data-id="${esc(f.num)}" aria-label="${esc(f.num)} details">
+    <header><b>${esc(f.num)}</b>${pill(s)}</header>
+    <div class="rt">${esc(f.from)}<span aria-hidden="true">✈</span>${esc(f.to)}</div>
+    <p class="muted">${esc(f.reg)} · ${f.pax} travellers (${Math.round(f.pax / CAP * 100)}% full) · ${hm(f.cancelled ? f.dep : f.adep)} → ${hm(f.cancelled ? f.arr : f.aarr)}</p>
+    ${bar(pr)}<small>${note}</small></button>`;
+}
+function vFlights() {
+  const q = UI.q.trim().toLowerCase();
+  const list = S.flights.map(f => ({ f, s: st(f) })).filter(({ f, s }) =>
+    (UI.chip === 'all' || s === UI.chip || (UI.chip === 'Late' && f.dlay >= 15 && !f.cancelled)) &&
+    (!q || [f.num, f.from, f.to, f.reg].join(' ').toLowerCase().includes(q)));
+  return `<div class="toolbar"><label class="sr" for="q">Search flights</label>
+    <input id="q" type="search" placeholder="Search a flight, airport or aircraft" value="${esc(UI.q)}">
+    <div class="chips" role="group" aria-label="Filter flights">${CHIPS.map(([k, l]) => `<button class="chip${UI.chip === k ? ' on' : ''}" aria-pressed="${UI.chip === k}" data-act="chip" data-chip="${k}">${l}</button>`).join('')}</div></div>
+    <p class="muted" aria-live="polite">${list.length} flight${list.length === 1 ? '' : 's'} shown</p>
+    <div class="cards">${list.map(({ f, s }) => flightCard(f, s)).join('') || '<p class="muted">No flights match. Try another search.</p>'}</div>`;
+}
+
+function vFleet() {
+  const cards = S.fleet.map(a => {
+    const l = S.flights.filter(f => f.reg === a.reg && !f.cancelled).sort((x, y) => x.dep - y.dep);
+    const next = l.find(f => f.adep >= S.now), done = l.filter(f => f.aarr <= S.now).pop();
+    const mins = l.reduce((s, f) => s + f.arr - f.dep, 0), busy = Math.min(100, Math.round(mins / 1140 * 100));
+    const status = a.down ? `<span class="pill" style="--c:#ff7a88">🔧 Grounded · ${esc(a.down)}</span>` : '<span class="pill" style="--c:#5ee6b5">✅ Ready to fly</span>';
+    return `<button class="card" data-act="reg" data-id="${esc(a.reg)}" aria-label="${esc(a.reg)} details">
+      <header><b>${esc(a.reg)}</b>${a.spare ? '<span class="pill" style="--c:#ff8fe0">🛟 Spare</span>' : ''}</header>
+      <p>📍 At <b>${esc(done ? done.to : a.loc)}</b></p><p class="muted">${next ? 'Next: ' + esc(next.num) + ' at ' + hm(next.adep) : 'No more flights today'}</p>${status}
+      ${bar(busy)}<small class="muted">Busy ${busy}% of the day</small></button>`;
+  }).join('');
+  const crew = S.crewList.map(c => { const i = crewInfo(S, c.reg), ok = !i || i.duty <= MAXDUTY;
+    return `<span class="chip" style="--c:${ok ? '#5ee6b5' : '#ff7a88'}"><span aria-hidden="true">${ok ? '✔' : '⚠'}</span> ${c.id} · ${i ? i.duty + ' / ' + MAXDUTY + ' min' : 'off duty'}</span>`; }).join('');
+  return `<h2>Aircraft</h2><div class="cards">${cards}</div><h2>Crew hours</h2><div class="chips">${crew}</div>
+    <p class="muted">Crew duty includes a 60-minute pre-flight briefing.</p>`;
+}
+
+function vLinks() {
+  const stt = S.conns.map(connStat), bad = stt.filter(s => s.s !== 'Safe'), pax = S.conns.reduce((s, c, i) => stt[i].s !== 'Safe' ? s + c.pax : s, 0);
+  return `<div class="glass"><h2>${S.conns.length} passenger connections</h2>
+    <p class="muted">${bad.length ? `${bad.length} need attention, affecting about ${pax} travellers.` : 'Everyone should make their connections 🎉'}</p></div>
+    <div class="cards">${S.conns.map((c, i) => { const s = stt[i], [lab, col] = LINK[s.s];
+      return `<article class="card" style="border-left:4px solid ${col}"><header><b>${esc(c.id)}</b><span class="pill" style="--c:${col}">${lab}</span></header>
+      <p>${esc(c.a.num)} ${esc(c.a.from)}→${esc(c.a.to)} <span class="muted">then</span> ${esc(c.b.num)} ${esc(c.b.from)}→${esc(c.b.to)}</p>
+      <p class="muted">Connects at ${esc(c.ap)} · ${c.pax} travellers · needs ${c.min} min${s.gap !== null ? ` · gives ${s.gap} min` : ' · flight cancelled'}</p></article>`; }).join('')}</div>`;
+}
+
+function vWhat() {
+  return `<p class="muted">Try a surprise and watch the network respond. Every step can be undone.</p>
+  <div class="cards">${SCN.map(([e, t, desc, type, g, v]) => `<article class="card scn"><div class="emo" aria-hidden="true">${e}</div><h2>${t}</h2><p class="muted">${desc}</p>
+    <button class="act" data-act="what" data-type="${esc(type)}" data-g="${esc(g)}" data-v="${v}">Try it</button></article>`).join('')}</div>
+  <section class="glass"><h2>What just happened</h2>${UI.diff ? UI.diff.map(x => `<p>${x}</p>`).join('') : '<p class="muted">Pick a scenario to see its effect.</p>'}
+  ${S.acts.length ? `<p class="muted" style="margin-top:10px">Active changes: ${S.acts.map(a => esc(a[0] + ' · ' + a[1])).join(', ')}</p>` : ''}
+  <div class="ctrl" style="margin-top:12px"><button data-act="undo">↶ Undo last change</button></div></section>`;
+}
+
+function vFix(m) {
+  const P = problems(m), r = UI.opt;
+  return `<div class="glass hero"><div><h2>Problems right now: <b>${P}</b></h2>
+    <p class="muted">${m.cancelled} cancelled · ${m.delayed} late · ${m.missed} missed connections · ${m.viol} crew over hours</p></div>
+    <button class="big" data-act="fix">✨ Fix what I can</button></div>
+    <p class="muted" style="margin-top:14px">A spare plane is only used when it's already at the right airport, has time to turn around, and is free before its flight.</p>
+    ${r ? `<section class="glass" style="margin-top:14px"><h2>Result</h2><p>Problems went from <b>${r.before}</b> to <b>${r.after}</b>.</p>
+    ${r.log.map(x => `<p>${esc(x)}</p>`).join('') || '<p class="muted">Nothing needed fixing 🎉</p>'}</section>`
+    : '<p class="muted" style="margin-top:14px">Press the button and the changes and reasons will appear here.</p>'}`;
+}
+
+function vChecks() {
+  const rows = checks(S), pass = rows.filter(r => r.ok).length;
+  return `<div class="glass"><h2>${pass} of ${rows.length} checks passing</h2>
+    <p class="muted">These run against the current schedule. A failing check is a real rule breach, not a display issue.</p></div>
+    <div class="cards">${rows.map(r => `<article class="card"><header><b>${esc(r.name)}</b><span class="pill" style="--c:${r.ok ? '#5ee6b5' : '#ff7a88'}">${r.ok ? '✅ Pass' : '❌ Fail'}</span></header><p class="muted">${esc(r.detail)}</p></article>`).join('')}</div>`;
+}
+
+/* ---------- DETAIL PANELS ---------- */
+function flightDetail(id) {
+  const f = S.flights.find(x => x.num === id); if (!f) return '';
+  const l = S.flights.filter(g => g.reg === f.reg && !g.cancelled).sort((x, y) => x.dep - y.dep);
+  const i = l.indexOf(f), prev = i > 0 ? l[i - 1] : null, next = i >= 0 && i < l.length - 1 ? l[i + 1] : null;
+  const cx = S.conns.filter(c => c.a === f || c.b === f), crew = S.crewList.find(c => c.reg === f.reg), ci = crew && crewInfo(S, f.reg);
+  const lf = Math.round(f.pax / CAP * 100);
+  return `<h2>${esc(f.num)} · ${esc(f.from)} → ${esc(f.to)}</h2><p>${pill(st(f))}</p><p class="muted">${AP_ALL[f.from]} to ${AP_ALL[f.to]}</p>
+  <div class="kv">${kv('Aircraft', esc(f.reg) + (f.covered ? ' (spare)' : ''))}${kv('Seats', CAP)}${kv('Travellers', f.pax)}${kv('Load factor', lf + '%')}
+  ${kv('Scheduled', hm(f.dep) + ' → ' + hm(f.arr))}${kv('Actual', f.cancelled ? '—' : hm(f.adep) + ' → ' + hm(f.aarr))}${kv('Block time', (f.arr - f.dep) + ' min')}${kv('Delay', f.cancelled ? '—' : f.dlay + ' min')}
+  ${kv('Turnaround before', prev && !f.cancelled ? (f.adep - prev.aarr) + ' min after ' + esc(prev.num) : 'Starts the aircraft’s day here')}${kv('Next on this aircraft', next ? esc(next.num) + ' at ' + hm(next.adep) : 'None today')}
+  ${kv('Crew', crew ? crew.id + (ci ? ' · ' + ci.duty + ' / ' + MAXDUTY + ' min used' : '') : '—')}${kv('Connections', cx.length ? cx.map(c => c.id).join(', ') : 'None')}</div>
+  ${cx.length ? `<div class="glass" style="margin-top:10px"><b>Connecting passengers</b>${cx.map(c => `<p>${c.id}: ${c.pax} travellers at ${c.ap}, ${LINK[connStat(c).s][0]}</p>`).join('')}</div>` : ''}
+  ${bar(lf)}<small class="muted">${lf}% of seats filled</small>`;
+}
+function airDetail(c) {
+  const h = airLoad(S, c), cap = Math.max(1, Math.round(capOf(S, c))), u = util(S, c), pk = h.indexOf(Math.max(...h));
+  const fl = S.flights.filter(f => !f.cancelled && (f.from === c || f.to === c)).sort((x, y) => (x.from === c ? x.dep : x.arr) - (y.from === c ? y.dep : y.arr));
+  const arr = fl.filter(f => f.to === c).length;
+  const state = S.airports[c].closed ? '🚫 Closed today' : S.airports[c].factor < 1 ? `⚠️ Reduced to ${Math.round(S.airports[c].factor * 100)}% of normal capacity` : '🟢 Operating normally';
+  return `<h2>${c} · ${AP_ALL[c]}</h2><p>${state}</p>
+  <div class="kv">${kv('Hourly capacity', cap)}${kv('Utilisation', Math.round(u * 100) + '%')}${kv('Arrivals', arr)}${kv('Departures', fl.length - arr)}${kv('Peak hour', hm(pk * 60))}${kv('Movements', h.reduce((s, n) => s + n, 0))}</div>
+  <div class="histo" role="img" aria-label="Movements by hour">${h.map((n, i) => `<i title="${hm(i * 60)} · ${n} movements" style="background:${n / cap >= 1 ? 'var(--bad)' : n / cap >= .8 ? 'var(--warn)' : 'var(--acc)'};height:${n ? Math.min(100, Math.max(6, n / cap * 100)) : 2}%"></i>`).join('')}</div>
+  <small class="muted">Movements by hour. Bar height shows share of hourly capacity.</small>
+  <h2 style="margin-top:14px">Schedule</h2>${fl.slice(0, 20).map(f => `<p>${esc(f.num)} · ${f.from === c ? 'departs ' + hm(f.adep) + ' to ' + esc(f.to) : 'arrives ' + hm(f.aarr) + ' from ' + esc(f.from)} · ${esc(f.reg)}</p>`).join('')}`;
+}
+function regDetail(reg) {
+  const a = S.fleet.find(x => x.reg === reg), l = S.flights.filter(f => f.reg === reg).sort((x, y) => x.dep - y.dep);
+  const crew = S.crewList.find(c => c.reg === reg), ci = crewInfo(S, reg), mins = l.filter(f => !f.cancelled).reduce((s, f) => s + f.arr - f.dep, 0);
+  return `<h2>${esc(reg)}${a.spare ? ' · spare' : ''}</h2><p>${a.down ? '🔧 Grounded: ' + esc(a.down) : '✅ Ready to fly'}</p>
+  <div class="kv">${kv('Seats', CAP)}${kv('Base', a.loc)}${kv('Flights today', l.filter(f => !f.cancelled).length)}${kv('Flying time', mins + ' min')}${kv('Crew', crew ? crew.id : '—')}${kv('Crew duty', ci ? ci.duty + ' / ' + MAXDUTY + ' min' : '—')}</div>
+  <h2 style="margin-top:14px">Flight sequence</h2>${l.map(f => `<p class="${f.cancelled ? 'muted' : ''}">${esc(f.num)} · ${esc(f.from)} → ${esc(f.to)} · ${f.cancelled ? 'cancelled' : hm(f.adep) + ' → ' + hm(f.aarr)}${f.covered ? ' (covered by spare)' : ''}</p>`).join('') || '<p class="muted">No flights assigned</p>'}`;
+}
+function detailModal() {
+  const d = UI.detail, body = d.k === 'flight' ? flightDetail(d.id) : d.k === 'air' ? airDetail(d.id) : regDetail(d.id);
+  return `<div class="modal"><div class="glass sheet" role="dialog" aria-modal="true" aria-label="Details">
+    <button class="x" data-act="close" aria-label="Close details">✕</button>${body}
+    <p class="muted" style="margin-top:12px">Sample data · simulated network</p></div></div>`;
+}
+
+/* ---------- ACTIONS ---------- */
+function doDisruption(t, g, v) { UI.diff = applyDisruption(S, t, g, v); toast(UI.diff.join(' ')); }
+function doFix() { UI.opt = runRecovery(S); toast(`Fixed what I could: ${UI.opt.before} → ${UI.opt.after} problems`); }
+function doUndo() {
+  if (!S.acts.length) return toast('Nothing to undo 🙂');
+  undoLast(S); UI.diff = null; UI.opt = null; toast('Undone ↶');
+}
+function doReset() {
+  Object.assign(S, createSim(600)); Object.assign(UI, { diff: null, opt: null, detail: null, q: '', chip: 'all' });
+  toast('Fresh start ✨');
+}
+
+/* ---------- RENDER ---------- */
+function header(m) {
+  const h = Math.floor(S.now / 60);
+  $('greet').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', controller 👋';
+  const air = S.flights.filter(f => st(f) === 'In Air').length;
+  $('sub').textContent = `${air} planes in the air now · ${m.delayed} running late · ${m.atRisk} connections to check`;
+  const pct = Math.round(S.flights.filter(f => !f.cancelled && f.dlay < 15).length / S.flights.length * 100);
+  $('ring').innerHTML = `<svg viewBox="0 0 120 120" width="110" height="110" role="img" aria-label="${pct} percent of flights on time">
+    <defs><linearGradient id="rg"><stop offset="0" stop-color="#8fb0ff"/><stop offset="1" stop-color="#ff8fe0"/></linearGradient></defs>
+    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="12"/>
+    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#rg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${pct * 3.14} 999" transform="rotate(-90 60 60)"/>
+    <text x="60" y="58" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">${pct}%</text>
+    <text x="60" y="76" text-anchor="middle" font-size="10" fill="#c3d0e8">on time</text></svg>`;
+  $('clock').value = S.now;
+  $('clk').textContent = hm(S.now);
+}
+
+function render() {
+  recalc(S);
+  const m = metrics(S);
+  const act = document.activeElement, focusId = act && act.id, pos = act && act.selectionStart;
+  header(m);
+  $('tabs').innerHTML = TABS.map(([k, l]) => `<button role="tab" aria-selected="${UI.tab === k}" data-act="tab" data-tab="${k}">${l}</button>`).join('');
+  $('view').innerHTML = TABS.find(t => t[0] === UI.tab)[2](m);
+  if (UI.detail) {
+    $('view').insertAdjacentHTML('beforeend', detailModal());
+    document.querySelector('.x')?.focus();
+  } else if (focusId) {
+    const e = $(focusId);
+    if (e) { e.focus(); if (pos != null && e.setSelectionRange) e.setSelectionRange(pos, pos); }
+  }
+}
+
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('modal')) { UI.detail = null; return render(); }
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const a = t.dataset;
+  switch (a.act) {
+    case 'tab': UI.tab = a.tab; break;
+    case 'flight': UI.detail = { k: 'flight', id: a.id }; break;
+    case 'air': UI.detail = { k: 'air', id: a.id }; break;
+    case 'reg': UI.detail = { k: 'reg', id: a.id }; break;
+    case 'close': UI.detail = null; break;
+    case 'chip': UI.chip = a.chip; break;
+    case 'what': doDisruption(a.type, a.g, +a.v); break;
+    case 'fix': doFix(); break;
+    case 'undo': doUndo(); break;
+  }
+  render();
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { UI.q = e.target.value; render(); }
+  if (e.target.id === 'clock') { S.now = +e.target.value; render(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && UI.detail) { UI.detail = null; render(); }
+});
+$('undo').addEventListener('click', () => { doUndo(); render(); });
+$('reset').addEventListener('click', () => { doReset(); render(); });
+render();
+
+</script>
+</body>
+</html>
